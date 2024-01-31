@@ -8,9 +8,12 @@ import java.util.List;
 
 @Entity
 @Data
+
 public class Tweet {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @OneToMany
+    @ManyToOne
     private User user;
     private String content;
     private String image;
