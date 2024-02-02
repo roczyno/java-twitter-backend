@@ -48,11 +48,17 @@ public class TweetServiceImpl implements TweetService{
 
     @Override
     public Tweet findTweetById(Long tweetId) throws TweetException {
-        return null;
+        return tweetRepository.findById(tweetId)
+                .orElseThrow(()-> new TweetException("Tweet with "+ tweetId+" not found"));
     }
 
     @Override
     public void deleteTweetById(Long tweetId, Long userId) throws TweetException, UserException {
+        Tweet tweet= findTweetById(tweetId);
+        if(!userId.equals(tweet.getUser().getId())){
+            throw new UserException("You can only delete your tweet");
+        }
+        tweetRepository.deleteById(tweetId);
 
     }
 

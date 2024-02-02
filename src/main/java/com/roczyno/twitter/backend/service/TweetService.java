@@ -5,7 +5,6 @@ import com.roczyno.twitter.backend.exception.UserException;
 import com.roczyno.twitter.backend.model.Tweet;
 import com.roczyno.twitter.backend.model.User;
 import com.roczyno.twitter.backend.request.TweetReplyRequest;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
