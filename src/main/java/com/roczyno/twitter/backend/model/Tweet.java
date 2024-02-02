@@ -24,7 +24,7 @@ public class Tweet {
     @OneToMany
     private List<Tweet> replyTweets= new ArrayList<>();
     @ManyToMany
-    private List<User> reTweetUser= new ArrayList<>();
+    private List<User> retweetUser= new ArrayList<>();
     @ManyToOne
     private Tweet replyFor;
     private boolean isReply;

@@ -38,10 +38,10 @@ public class TweetServiceImpl implements TweetService{
     @Override
     public Tweet retweet(Long tweetId, User user) throws UserException, TweetException {
         Tweet tweet= findTweetById(tweetId);
-        if(tweet.getReTweetUser().contains(user)){
-            tweet.getReTweetUser().remove(user);
+        if(tweet.getRetweetUser().contains(user)){
+            tweet.getRetweetUser().remove(user);
         }else {
-            tweet.getReTweetUser().add(user);
+            tweet.getRetweetUser().add(user);
         }
         return tweetRepository.save(tweet);
     }
@@ -67,18 +67,32 @@ public class TweetServiceImpl implements TweetService{
         return null;
     }
 
+
     @Override
     public Tweet createdReply(TweetReplyRequest req, User user) throws TweetException, UserException {
-        return null;
+        Tweet replyFor = findTweetById(req.getTweetId());
+        Tweet tweet = new Tweet();
+        tweet.setContent(req.getContent());
+        tweet.setCreatedAt(LocalDateTime.now());
+        tweet.setImage(req.getImage());
+        tweet.setUser(user);
+        tweet.setReply(true);
+        tweet.setTweet(false);
+        tweet.setReplyFor(replyFor);
+
+        Tweet savedReply = tweetRepository.save(tweet);
+        tweet.getReplyTweets().add(savedReply);
+        tweetRepository.save(replyFor);
+        return replyFor;
     }
 
     @Override
     public List<Tweet> getUserTweet(User user) {
-        return null;
+        return tweetRepository.findByRetweetUserContainsOrUser_IdAndIsTweetTrueOrderByCreatedAtDesc(user,user.getId());
     }
 
     @Override
     public List<Tweet> findByLikesContainingUser(User user) {
-        return null;
+        return tweetRepository.findByLikesUser_id(user.getId());
     }
 }

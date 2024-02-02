@@ -12,7 +12,7 @@ public interface TweetRepository extends JpaRepository<Tweet,Long> {
     List<Tweet> findAllByIsTweetTrueOrderByCreatedAtDesc();
     List<Tweet> findByRetweetUserContainsOrUser_IdAndIsTweetTrueOrderByCreatedAtDesc(User user, long userId);
     List<Tweet> findByLikesContainingOrderByCreatedAtDesc(User user);
-    @Query("SELECT t FROM Tweet t JOIN t.likes l WHERE l.userId = :userId")
+    @Query("SELECT t FROM Tweet t JOIN t.likes l WHERE l.user.id = :userId")
     List<Tweet> findByLikesUser_id(@Param("userId") Long userId);
 
 }
