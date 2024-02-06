@@ -92,7 +92,7 @@ public class TweetController {
     }
 
     @GetMapping("/user/{userId}/likes")
-    public ResponseEntity<List<TweetDto>> findTweetByLikesContainingUser(@RequestHeader("Authorization") String jwt) throws UserException {
+    public ResponseEntity<List<TweetDto>> findTweetsByUserLikes(@RequestHeader("Authorization") String jwt) throws UserException {
         User user = userService.findUserProfileByJwt(jwt);
         List<Tweet> tweets= tweetService.findByLikesContainingUser(user);
         List<TweetDto> tweetDtos= TweetDtoMapper.toTweetDtos(tweets,user);
