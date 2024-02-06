@@ -35,7 +35,7 @@ public class TweetDtoMapper {
         return tweetDto;
     }
 
-    private static List<TweetDto> toTweetDtos(List<Tweet> tweets, User reqUser) {
+    public static List<TweetDto> toTweetDtos(List<Tweet> tweets, User reqUser) {
         List<TweetDto> tweetDtos = new ArrayList<>();
         for (Tweet tweet : tweets) {
             TweetDto tweetDto = toReplyTweetDto(tweet, reqUser);
@@ -44,7 +44,7 @@ public class TweetDtoMapper {
         return tweetDtos;  // Added missing return statement
     }
 
-    private static TweetDto toReplyTweetDto(Tweet tweet, User reqUser) {
+    public static TweetDto toReplyTweetDto(Tweet tweet, User reqUser) {
         UserDto user = UserDtoMapper.toUserDto(tweet.getUser());
         boolean isLiked = TwitUtil.isLikedByReqUser(reqUser, tweet);
         boolean isRetweeted = TwitUtil.isRetweetedByReqUser(reqUser, tweet);
