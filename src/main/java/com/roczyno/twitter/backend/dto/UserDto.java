@@ -12,7 +12,7 @@ public class UserDto {
     private String email;
     private String password;
     private String image;
-    private boolean reg_user;
+    private boolean req_user;
     private boolean login_with_google;
     private List<UserDto> followers = new ArrayList<>();
     private List<UserDto> followings= new ArrayList<>();
