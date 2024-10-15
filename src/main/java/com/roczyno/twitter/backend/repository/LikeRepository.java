@@ -1,6 +1,7 @@
 package com.roczyno.twitter.backend.repository;
 
 import com.roczyno.twitter.backend.model.Like;
+import com.roczyno.twitter.backend.model.Tweet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

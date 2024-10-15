@@ -60,8 +60,6 @@ public class AuthenticationService {
 	}
 
 
-
-
 	private Authentication authenticate(String username, String password) {
 
 		UserDetails userDetails= customUserDetailsServiceImplementation.loadUserByUsername(username);

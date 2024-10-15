@@ -1,23 +1,27 @@
 package com.roczyno.twitter.backend.service;
 
+import com.roczyno.twitter.backend.dto.TweetDto;
+import com.roczyno.twitter.backend.dto.TweetDtoMapper;
 import com.roczyno.twitter.backend.exception.TweetException;
 import com.roczyno.twitter.backend.exception.UserException;
 import com.roczyno.twitter.backend.model.Tweet;
 import com.roczyno.twitter.backend.model.User;
 import com.roczyno.twitter.backend.repository.TweetRepository;
 import com.roczyno.twitter.backend.request.TweetReplyRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TweetServiceImpl implements TweetService{
-    @Autowired
-    private TweetRepository tweetRepository;
+    private final TweetRepository tweetRepository;
+    private final TweetDtoMapper tweetDtoMapper;
+
     @Override
-    public Tweet createTweet(Tweet req, User user) throws UserException {
+    public TweetDto createTweet(Tweet req, User user) {
         Tweet tweet = new Tweet();
         tweet.setContent(req.getContent());
         tweet.setCreatedAt(LocalDateTime.now());
@@ -26,51 +30,57 @@ public class TweetServiceImpl implements TweetService{
         tweet.setUser(user);
         tweet.setReply(false);
         tweet.setTweet(true);
-        return tweetRepository.save(tweet);
+        Tweet savedTweet= tweetRepository.save(tweet);
+		return tweetDtoMapper.toTweetDto(savedTweet,user);
     }
 
     @Override
-    public List<Tweet> findAllTweets() {
-
-        return tweetRepository.findAllByIsTweetTrueOrderByCreatedAtDesc();
+    public List<TweetDto> findAllTweets(User user) {
+        List<Tweet> tweets= tweetRepository.findAll();
+        return tweetDtoMapper.toTweetDtos(tweets,user);
     }
 
     @Override
-    public Tweet retweet(Long tweetId, User user) throws UserException, TweetException {
-        Tweet tweet= findTweetById(tweetId);
+    public TweetDto retweet(Long tweetId, User user){
+        Tweet tweet=tweetRepository.findById(tweetId)
+                .orElseThrow(()-> new TweetException("Tweet with "+ tweetId+" not found"));
         if(tweet.getRetweetUser().contains(user)){
             tweet.getRetweetUser().remove(user);
         }else {
             tweet.getRetweetUser().add(user);
         }
-        return tweetRepository.save(tweet);
+        Tweet savedRetweet=tweetRepository.save(tweet);
+        return tweetDtoMapper.toTweetDto(savedRetweet,user);
     }
 
     @Override
-    public Tweet findTweetById(Long tweetId) throws TweetException {
-        return tweetRepository.findById(tweetId)
+    public TweetDto findTweetById(Long tweetId,User user){
+        Tweet tweet= tweetRepository.findById(tweetId)
                 .orElseThrow(()-> new TweetException("Tweet with "+ tweetId+" not found"));
+        return tweetDtoMapper.toTweetDto(tweet,user);
     }
 
     @Override
-    public void deleteTweetById(Long tweetId, Long userId) throws TweetException, UserException {
-        Tweet tweet= findTweetById(tweetId);
+    public String deleteTweetById(Long tweetId, Long userId) throws TweetException, UserException {
+        Tweet tweet=tweetRepository.findById(tweetId)
+                .orElseThrow(()-> new TweetException("Tweet with "+ tweetId+" not found"));
         if(!userId.equals(tweet.getUser().getId())){
             throw new UserException("You can only delete your tweet");
         }
         tweetRepository.deleteById(tweetId);
-
+        return "tweet deleted";
     }
 
     @Override
-    public Tweet removeFromRetweet(Long tweetId, User user) throws TweetException, UserException {
+    public Tweet removeFromRetweet(Long tweetId, User user) {
         return null;
     }
 
 
     @Override
-    public Tweet createdReply(TweetReplyRequest req, User user) throws TweetException, UserException {
-        Tweet replyFor = findTweetById(req.getTweetId());
+    public TweetDto createdReply(TweetReplyRequest req, User user) {
+        Tweet replyFor = tweetRepository.findById(req.getTweetId())
+                .orElseThrow(()-> new TweetException("Tweet with "+ req.getTweetId()+" not found"));
         Tweet tweet = new Tweet();
         tweet.setContent(req.getContent());
         tweet.setCreatedAt(LocalDateTime.now());
@@ -80,25 +90,26 @@ public class TweetServiceImpl implements TweetService{
         tweet.setTweet(false);
         tweet.setReplyFor(replyFor);
 
-        // Save the newly created reply
+
         Tweet savedReply = tweetRepository.save(tweet);
 
-        // Add the newly created reply to the replyFor tweet's list of replyTweets
         replyFor.getReplyTweets().add(savedReply);
-        tweetRepository.save(replyFor);
+        Tweet  newSavedReply=tweetRepository.save(replyFor);
+        return tweetDtoMapper.toTweetDto(newSavedReply,user);
 
-        // Return the newly created reply
-        return savedReply;
     }
 
 
     @Override
-    public List<Tweet> getUserTweet(User user) {
-        return tweetRepository.findByRetweetUserContainsOrUser_IdAndIsTweetTrueOrderByCreatedAtDesc(user,user.getId());
+    public List<TweetDto> getUserTweet(User user) {
+        List<Tweet> tweets= tweetRepository
+                .findByUserContainsAndTweetTrueOrderByCreatedAtDesc(user);
+        return tweetDtoMapper.toTweetDtos(tweets,user);
     }
 
     @Override
-    public List<Tweet> findByLikesContainingUser(User user) {
-        return tweetRepository.findByLikesUser_id(user.getId());
+    public List<TweetDto> findByLikesContainingUser(User user) {
+        List<Tweet> tweets=tweetRepository.findByLikesUser_id(user.getId());
+        return tweetDtoMapper.toTweetDtos(tweets,user);
     }
 }

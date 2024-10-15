@@ -1,16 +1,18 @@
 package com.roczyno.twitter.backend.service;
 
+import com.roczyno.twitter.backend.dto.UserDto;
 import com.roczyno.twitter.backend.exception.UserException;
 import com.roczyno.twitter.backend.model.User;
+import com.roczyno.twitter.backend.request.UpdateUserRequest;
 
 import java.util.List;
 
 public interface UserService {
-    User findUserById(Long userId) throws UserException;
-    User findUserProfileByJwt(String jwt) throws UserException;
-    User updateUser(Long userId,User user) throws UserException;
-    User followUser (Long userId,User user) throws UserException;
-    List<User> searchUser(String query);
+    UserDto findUserById(Long userId);
+    User findUserProfileByJwt(String jwt);
+    UserDto updateUser(Long userId, UpdateUserRequest user);
+    String followUser (Long userId,User user);
+    List<UserDto> searchUser(String query);
 
 
 }

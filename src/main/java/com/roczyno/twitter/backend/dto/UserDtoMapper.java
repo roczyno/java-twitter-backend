@@ -1,12 +1,14 @@
 package com.roczyno.twitter.backend.dto;
 
 import com.roczyno.twitter.backend.model.User;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class UserDtoMapper {
-    public static UserDto toUserDto(User user){
+    public UserDto toUserDto(User user){
         UserDto userDto= new UserDto();
         userDto.setId(user.getId());
         userDto.setFullName(user.getFullName());
@@ -19,7 +21,7 @@ public class UserDtoMapper {
         return userDto;
     }
 
-    public static List<UserDto> toUserDtos(List<User> followers) {
+    public List<UserDto> toUserDtos(List<User> followers) {
         List<UserDto> userDtos= new ArrayList<>();
         for(User user:followers){
             UserDto userDto= new UserDto();

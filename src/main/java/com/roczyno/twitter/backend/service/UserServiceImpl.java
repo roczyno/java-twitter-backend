@@ -1,27 +1,33 @@
 package com.roczyno.twitter.backend.service;
 
 import com.roczyno.twitter.backend.config.JwtProvider;
+import com.roczyno.twitter.backend.dto.UserDto;
+import com.roczyno.twitter.backend.dto.UserDtoMapper;
 import com.roczyno.twitter.backend.exception.UserException;
 import com.roczyno.twitter.backend.model.User;
 import com.roczyno.twitter.backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.roczyno.twitter.backend.request.UpdateUserRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private JwtProvider jwtProvider;
+
+    private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
+    private final UserDtoMapper userDtoMapper;
+
     @Override
-    public User findUserById(Long userId) throws UserException {
-        return userRepository.findById(userId).orElseThrow(()->new UserException("User with id not found"));
+    public UserDto findUserById(Long userId) {
+        User user=userRepository.findById(userId).orElseThrow(()->new UserException("User with id not found"));
+       return userDtoMapper.toUserDto(user);
     }
 
     @Override
-    public User findUserProfileByJwt(String jwt) throws UserException {
+    public User findUserProfileByJwt(String jwt) {
         String email=jwtProvider.getEmailFromToken(jwt);
         User user=userRepository.findByEmail(email);
         if(user==null){
@@ -31,45 +37,43 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User updateUser(Long userId, User req) throws UserException {
-        User user = findUserById(userId);
-        if(req.getFullName()!=null){
-            user.setFullName(req.getFullName());
+    public UserDto updateUser(Long userId, UpdateUserRequest req) {
+        User user = userRepository.findById(userId).orElseThrow(()->new UserException("User with id not found"));
+        if(req.fullName()!=null){
+            user.setFullName(req.fullName());
         }
-        if(req.getEmail()!=null){
-            user.setEmail(req.getEmail());
+        if(req.image()!=null){
+            user.setImage(req.image());
         }
-        if(req.getImage()!=null){
-            user.setImage(req.getImage());
-        }
-        return userRepository.save(user);
+        User updatedUser= userRepository.save(user);
+        return userDtoMapper.toUserDto(updatedUser);
     }
 
     @Override
-    public User followUser(Long userId, User user) throws UserException {
-        // Retrieve the user to be followed/unfollowed by their ID
-        User userToBeFollowed = findUserById(userId);
+    public String followUser(Long userId, User user){
 
-        // Check if the users are already following each other
+        User userToBeFollowed = userRepository.findById(userId).orElseThrow(()->new UserException("User with id not found"));
+
         if (user.getFollowings().contains(userToBeFollowed) && userToBeFollowed.getFollowers().contains(user)) {
-            // If already following, remove the follow relationship
+
             user.getFollowers().remove(userToBeFollowed);
             userToBeFollowed.getFollowings().remove(user);
         } else {
-            // If not following, add the follow relationship
+
             user.getFollowers().add(userToBeFollowed);
             userToBeFollowed.getFollowings().add(user);
         }
-        // Save the changes to both users
+
         userRepository.save(userToBeFollowed);
         userRepository.save(user);
-        // Return the user being followed/unfollowed
-        return userToBeFollowed;
+
+      return "follow successful";
     }
 
 
     @Override
-    public List<User> searchUser(String query) {
-        return userRepository.searchUser(query);
+    public List<UserDto> searchUser(String query) {
+        List<User> users=userRepository.searchUser(query);
+        return userDtoMapper.toUserDtos(users);
     }
 }

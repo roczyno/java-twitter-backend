@@ -3,13 +3,19 @@ package com.roczyno.twitter.backend.dto;
 import com.roczyno.twitter.backend.model.Tweet;
 import com.roczyno.twitter.backend.model.User;
 import com.roczyno.twitter.backend.utils.TwitUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
+@RequiredArgsConstructor
 public class TweetDtoMapper {
-    public static TweetDto toTweetDto(Tweet tweet, User reqUser) {
-        UserDto user = UserDtoMapper.toUserDto(tweet.getUser());
+    private final UserDtoMapper userDtoMapper;
+
+    public  TweetDto toTweetDto(Tweet tweet, User reqUser) {
+        UserDto user = userDtoMapper.toUserDto(tweet.getUser());
         boolean isLiked = TwitUtil.isLikedByReqUser(reqUser, tweet);
         boolean isRetweeted = TwitUtil.isRetweetedByReqUser(reqUser, tweet);
         List<Long> retweetUserIds = new ArrayList<>();
@@ -35,17 +41,17 @@ public class TweetDtoMapper {
         return tweetDto;
     }
 
-    public static List<TweetDto> toTweetDtos(List<Tweet> tweets, User reqUser) {
+    public  List<TweetDto> toTweetDtos(List<Tweet> tweets, User reqUser) {
         List<TweetDto> tweetDtos = new ArrayList<>();
         for (Tweet tweet : tweets) {
             TweetDto tweetDto = toReplyTweetDto(tweet, reqUser);
             tweetDtos.add(tweetDto);
         }
-        return tweetDtos;  // Added missing return statement
+        return tweetDtos;
     }
 
-    public static TweetDto toReplyTweetDto(Tweet tweet, User reqUser) {
-        UserDto user = UserDtoMapper.toUserDto(tweet.getUser());
+    public  TweetDto toReplyTweetDto(Tweet tweet, User reqUser) {
+        UserDto user = userDtoMapper.toUserDto(tweet.getUser());
         boolean isLiked = TwitUtil.isLikedByReqUser(reqUser, tweet);
         boolean isRetweeted = TwitUtil.isRetweetedByReqUser(reqUser, tweet);
         List<Long> retweetUserIds = new ArrayList<>();

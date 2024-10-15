@@ -10,6 +10,7 @@ import com.roczyno.twitter.backend.request.TweetReplyRequest;
 import com.roczyno.twitter.backend.response.ApiResponse;
 import com.roczyno.twitter.backend.service.TweetService;
 import com.roczyno.twitter.backend.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,90 +19,51 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tweet")
+@RequestMapping("/api/v1/tweet")
+@RequiredArgsConstructor
 public class TweetController {
-
-    @Autowired
-    private TweetService tweetService;
-    @Autowired
-    private UserService userService;
+    private final TweetService tweetService;
+    private final UserService userService;
 
 
-    @PostMapping("/create")
-    public ResponseEntity<TweetDto> createdTweet(@RequestBody Tweet req, @RequestHeader("Authorization") String jwt)
-            throws UserException{
-        System.out.println(jwt);
-        User user = userService.findUserProfileByJwt(jwt);
-
-        Tweet tweet= tweetService.createTweet(req,user);
-        TweetDto tweetDto= TweetDtoMapper.toTweetDto(tweet,user);
-        return new ResponseEntity<>(tweetDto, HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<TweetDto> createdTweet(@RequestBody Tweet req, @RequestHeader("Authorization") String jwt) {
+       return ResponseEntity.ok(tweetService.createTweet(req,userService.findUserProfileByJwt(jwt)));
     }
 
     @PostMapping("/reply")
-    public ResponseEntity<TweetDto> replyTweet(@RequestBody TweetReplyRequest req, @RequestHeader("Authorization") String jwt)
-            throws UserException, TweetException{
-        User user = userService.findUserProfileByJwt(jwt);
-        Tweet tweet= tweetService.createdReply(req,user);
-        TweetDto tweetDto= TweetDtoMapper.toTweetDto(tweet,user);
-        return new ResponseEntity<>(tweetDto, HttpStatus.CREATED);
+    public ResponseEntity<TweetDto> replyTweet(@RequestBody TweetReplyRequest req, @RequestHeader("Authorization") String jwt) {
+      return ResponseEntity.ok(tweetService.createdReply(req,userService.findUserProfileByJwt(jwt)));
     }
 
     @PutMapping("/{tweetId}/retweet")
-    public ResponseEntity<TweetDto> reTweet(@PathVariable Long tweetId, @RequestHeader("Authorization") String jwt)
-            throws UserException, TweetException{
-        User user = userService.findUserProfileByJwt(jwt);
-        Tweet tweet= tweetService.retweet(tweetId,user);
-        TweetDto tweetDto= TweetDtoMapper.toTweetDto(tweet,user);
-        return new ResponseEntity<>(tweetDto, HttpStatus.OK);
+    public ResponseEntity<TweetDto> reTweet(@PathVariable Long tweetId, @RequestHeader("Authorization") String jwt){
+       return ResponseEntity.ok(tweetService.retweet(tweetId,userService.findUserProfileByJwt(jwt)));
     }
 
     @GetMapping("/{tweetId}")
-    public ResponseEntity<TweetDto> findTweetById(@PathVariable Long tweetId, @RequestHeader("Authorization") String jwt)
-            throws UserException, TweetException{
-        User user = userService.findUserProfileByJwt(jwt);
-        Tweet tweet= tweetService.findTweetById(tweetId);
-        TweetDto tweetDto= TweetDtoMapper.toTweetDto(tweet,user);
-        return new ResponseEntity<>(tweetDto, HttpStatus.OK);
+    public ResponseEntity<TweetDto> findTweetById(@PathVariable Long tweetId, @RequestHeader("Authorization") String jwt){
+        return ResponseEntity.ok(tweetService.findTweetById(tweetId,userService.findUserProfileByJwt(jwt)));
     }
 
     @DeleteMapping("/{tweetId}")
-    public ResponseEntity<ApiResponse> deleteTweetById(@PathVariable Long tweetId, @RequestHeader("Authorization") String jwt)
-            throws UserException, TweetException{
-        User user = userService.findUserProfileByJwt(jwt);
-       tweetService.deleteTweetById(tweetId,user.getId());
-
-       ApiResponse res = new ApiResponse();
-       res.setMessage("Tweet deleted successfully");
-       res.setStatus(true);
-
-       return new ResponseEntity<>(res,HttpStatus.OK);
-
-
+    public ResponseEntity<String> deleteTweetById(@PathVariable Long tweetId, @RequestHeader("Authorization") String jwt){
+       return ResponseEntity.ok(tweetService.deleteTweetById(tweetId,userService.findUserProfileByJwt(jwt).getId()));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<TweetDto>> getAllTweets(@RequestHeader("Authorization") String jwt) throws UserException {
-        User user = userService.findUserProfileByJwt(jwt);
-       List<Tweet> tweets= tweetService.findAllTweets();
-        List<TweetDto> tweetDtos= TweetDtoMapper.toTweetDtos(tweets,user);
-        return new ResponseEntity<>(tweetDtos,HttpStatus.OK);
+    public ResponseEntity<List<TweetDto>> getAllTweets(@RequestHeader("Authorization") String jwt){
+        return ResponseEntity.ok(tweetService.findAllTweets(userService.findUserProfileByJwt(jwt)));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TweetDto>> getUserAllTweets(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) throws UserException {
-        User user = userService.findUserProfileByJwt(jwt);
-        List<Tweet> tweets= tweetService.getUserTweet(user);
-        List<TweetDto> tweetDtos= TweetDtoMapper.toTweetDtos(tweets,user);
-        return new ResponseEntity<>(tweetDtos,HttpStatus.OK);
+    @GetMapping("/user")
+    public ResponseEntity<List<TweetDto>> getUserAllTweets(@RequestHeader("Authorization") String jwt){
+      return ResponseEntity.ok(tweetService.getUserTweet(userService.findUserProfileByJwt(jwt)));
     }
 
-    @GetMapping("/user/{userId}/likes")
-    public ResponseEntity<List<TweetDto>> findTweetsByUserLikes(@RequestHeader("Authorization") String jwt) throws UserException {
-        User user = userService.findUserProfileByJwt(jwt);
-        List<Tweet> tweets= tweetService.findByLikesContainingUser(user);
-        List<TweetDto> tweetDtos= TweetDtoMapper.toTweetDtos(tweets,user);
-        return new ResponseEntity<>(tweetDtos,HttpStatus.OK);
+    @GetMapping("/user/likes")
+    public ResponseEntity<List<TweetDto>> findTweetsByUserLikes(@RequestHeader("Authorization") String jwt){
+      return ResponseEntity.ok(tweetService.findByLikesContainingUser(userService.findUserProfileByJwt(jwt)));
     }
 
 

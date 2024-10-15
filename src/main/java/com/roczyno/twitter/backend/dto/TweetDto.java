@@ -1,7 +1,5 @@
 package com.roczyno.twitter.backend.dto;
 
-import com.roczyno.twitter.backend.model.User;
-import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 import java.time.LocalDateTime;
