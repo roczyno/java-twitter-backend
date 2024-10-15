@@ -17,8 +17,7 @@ public class UserServiceImpl implements UserService{
     private JwtProvider jwtProvider;
     @Override
     public User findUserById(Long userId) throws UserException {
-        User user = userRepository.findById(userId).orElseThrow(()->new UserException("User with id not found"));
-        return user;
+        return userRepository.findById(userId).orElseThrow(()->new UserException("User with id not found"));
     }
 
     @Override

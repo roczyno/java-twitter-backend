@@ -80,11 +80,17 @@ public class TweetServiceImpl implements TweetService{
         tweet.setTweet(false);
         tweet.setReplyFor(replyFor);
 
+        // Save the newly created reply
         Tweet savedReply = tweetRepository.save(tweet);
-        tweet.getReplyTweets().add(savedReply);
+
+        // Add the newly created reply to the replyFor tweet's list of replyTweets
+        replyFor.getReplyTweets().add(savedReply);
         tweetRepository.save(replyFor);
-        return replyFor;
+
+        // Return the newly created reply
+        return savedReply;
     }
+
 
     @Override
     public List<Tweet> getUserTweet(User user) {

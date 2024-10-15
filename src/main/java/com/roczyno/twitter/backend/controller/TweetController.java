@@ -10,6 +10,7 @@ import com.roczyno.twitter.backend.request.TweetReplyRequest;
 import com.roczyno.twitter.backend.response.ApiResponse;
 import com.roczyno.twitter.backend.service.TweetService;
 import com.roczyno.twitter.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +21,18 @@ import java.util.List;
 @RequestMapping("/api/tweet")
 public class TweetController {
 
+    @Autowired
     private TweetService tweetService;
+    @Autowired
     private UserService userService;
 
 
     @PostMapping("/create")
     public ResponseEntity<TweetDto> createdTweet(@RequestBody Tweet req, @RequestHeader("Authorization") String jwt)
             throws UserException{
+        System.out.println(jwt);
         User user = userService.findUserProfileByJwt(jwt);
+
         Tweet tweet= tweetService.createTweet(req,user);
         TweetDto tweetDto= TweetDtoMapper.toTweetDto(tweet,user);
         return new ResponseEntity<>(tweetDto, HttpStatus.CREATED);
@@ -75,7 +80,7 @@ public class TweetController {
 
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     public ResponseEntity<List<TweetDto>> getAllTweets(@RequestHeader("Authorization") String jwt) throws UserException {
         User user = userService.findUserProfileByJwt(jwt);
        List<Tweet> tweets= tweetService.findAllTweets();

@@ -32,8 +32,6 @@ public class LikeController {
         LikeDto likeDto= LikeDtoMapper.toLikeDto(like,user);
         return new ResponseEntity<>(likeDto, HttpStatus.CREATED);
     }
-}
-
     @GetMapping("/tweet/{tweetId}/likes")
     public ResponseEntity<List<LikeDto>> getAllLikes(@PathVariable Long tweetId, @RequestHeader("Authorization") String jwt)
             throws UserException, TweetException {
@@ -42,4 +40,7 @@ public class LikeController {
         List<LikeDto> likeDtos= LikeDtoMapper.toLikeDtos(likes,user);
         return new ResponseEntity<>(likeDtos, HttpStatus.OK);
     }
+
+
+
 }
